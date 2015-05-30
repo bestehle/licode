@@ -6,6 +6,6 @@ ROOT=`dirname $SCRIPT`
 CURRENT_DIR=`pwd`
 
 cd $ROOT/erizoAgent
-node erizoAgent.js &
+nodejs erizoAgent.js &
 
 cd $CURRENT_DIR
