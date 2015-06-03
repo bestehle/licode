@@ -30,4 +30,16 @@ export ERIZO_HOME=$ROOT/erizo/
 cp $ROOT/erizo_controller/erizoClient/dist/erizo.js $EXTRAS/basic_example/public/
 cp $ROOT/nuve/nuveClient/dist/nuve.js $EXTRAS/basic_example/
 
+cd $ROOT/extras/basic_example/
+
+node basicServer.js &
+
+sleep 2
+
+curl -d username='user' -d role='presenter'  http://178.254.52.184:3001/createToken/
+
+sleep 2
+
+kill %-1
+
 echo [licode] Done, run basic_example/basicServer.js
