@@ -5,7 +5,6 @@ var logger = require('./../common/logger').logger;
 // Logger
 var log = logger.getLogger("RoomController");
 
-
 exports.RoomController = function (spec) {
     "use strict";
 
@@ -21,6 +20,7 @@ exports.RoomController = function (spec) {
         externalOutputs = {};
 
     var amqper = spec.amqper;
+    var ecch = spec.ecch;
 
     var KEEPALIVE_INTERVAL = 5*1000;
     var TIMEOUT_LIMIT = 2;
@@ -40,7 +40,7 @@ exports.RoomController = function (spec) {
                     for (var p in erizos[erizo_id].publishers) {
                         dispatchEvent("unpublish", erizos[erizo_id].publishers[p]);
                     }
-                    amqper.callRpc("ErizoAgent", "deleteErizoJS", [erizo_id], {callback: function(){}}); 
+                    ecch.deleteErizoJS(erizo_id);
                     delete erizos[erizo_id];
                 }
             } else {
@@ -58,13 +58,13 @@ exports.RoomController = function (spec) {
     var keepAliveLoop = setInterval(sendKeepAlive, KEEPALIVE_INTERVAL);
 
     var getErizoJS = function(callback) {
-    	amqper.callRpc("ErizoAgent", "createErizoJS", [], {callback: function(erizo_id) {
+    	ecch.getErizoJS(function(erizo_id) {
             log.info("Using Erizo", erizo_id);
             if (!erizos[erizo_id] && erizo_id !== 'timeout') {
                 erizos[erizo_id] = {publishers: [], ka_count: 0};
             }
             callback(erizo_id);
-        }});
+        });
     };
 
     var getErizoQueue = function(publisher_id) {
@@ -161,11 +161,11 @@ exports.RoomController = function (spec) {
      * and a new WebRtcConnection. This WebRtcConnection will be the publisher
      * of the OneToManyProcessor.
      */
-    that.addPublisher = function (publisher_id, callback) {
+    that.addPublisher = function (publisher_id, options, callback) {
 
         if (publishers[publisher_id] === undefined) {
 
-            log.info("Adding publisher peer_id ", publisher_id);
+            log.info("Adding publisher peer_id ", publisher_id, "minVideoBW", options.minVideoBW);
 
             // We create a new ErizoJS with the publisher_id.
             getErizoJS(function(erizo_id) {
@@ -181,7 +181,8 @@ exports.RoomController = function (spec) {
                 subscribers[publisher_id] = [];
                 
                 // then we call its addPublisher method.
-                var args = [publisher_id];
+                var args = [publisher_id, options.minVideoBW];
+                //TODO: Possible race condition if we got an old id
                 amqper.callRpc(getErizoQueue(publisher_id), "addPublisher", args, {callback: callback});
 
                 erizos[erizo_id].publishers.push(publisher_id);
