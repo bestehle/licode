@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({
 //disable layout
 //app.set("view options", {layout: false});
 
-N.API.init(config.nuve.superserviceID, config.nuve.superserviceKey, 'http://localhost:3000/');
+N.API.init(config.nuve.superserviceID, config.nuve.superserviceKey, 'http://178.254.52.184:3000/');
 
 var myRoom;
 
@@ -89,7 +89,7 @@ app.post('/createToken/', function(req, res) {
 
 app.use(function(req, res, next) {
     "use strict";
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', 'http://178.254.52.184:4000');
     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE');
     res.header('Access-Control-Allow-Headers', 'origin, content-type');
     if (req.method == 'OPTIONS') {
